@@ -9,7 +9,7 @@ Use python to realize the gradient iterative decision tree model of the GBDT alg
 - Python Libraries：pandas、PIL、pydotplus，
 ## Command
 ```
-python example.py --model = regression
+python gbdt.py
 ```
 ## Results
 The results of this project are in results folder.

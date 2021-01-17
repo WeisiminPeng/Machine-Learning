@@ -17,16 +17,16 @@ class Node:
 
     def update_predict_value(self, targets, y):
         self.predict_value = self.loss.update_leaf_values(targets, y)
-        self.logger.info(('叶子节点预测值：', self.predict_value))
+        self.logger.info(('Predicted value of leaf node: ', self.predict_value))
 
-    def get_predict_value(self, instance):    ##告诉你怎么得到预测值，预测值得到过程
+    def get_predict_value(self, instance): 
         
         if self.is_leaf:
             print(instance.iloc[:3])
             self.logger.info(('predict:', self.predict_value))
-            self.logger.info(('误差:', self.predict_value-instance['label']))
+            self.logger.info(('error: ', self.predict_value-instance['label']))
             return self.predict_value
-        content = self.split_feature+': '+ str(instance[self.split_feature]) + ', 节点决策值是： '+ str(self.split_value)
+        content = self.split_feature+': '+ str(instance[self.split_feature]) + ', The node decision value is: '+ str(self.split_value)
         print(content)
         if instance[self.split_feature] < self.split_value:
             return self.left_child.get_predict_value(instance)
@@ -48,11 +48,14 @@ class Tree:
 
     def build_tree(self, data, remain_index, depth=0):
         """
-        此处有三个树继续生长的条件：
-            1: 深度没有到达最大, 树的深度假如是3， 意思是需要生长成3层, 那么这里的depth只能是0, 1 
-                所以判断条件是 depth < self.max_depth - 1
-            2: 点样本数 >= min_samples_split
-            3: 此节点上的样本的 target_name 值不一样（如果值 一样说明已经划分得很好了，不需要再分）
+        There are three conditions for the continued growth of the tree:
+             1: The depth has not reached the maximum. 
+                If the depth of the tree is 3, which means it needs to grow into 3 layers, 
+                then the depth here can only be 0, 1
+                So the judgment condition is depth <self.max_depth-1
+             2: Point samples >= min_samples_split
+             3: The target_name values of the samples on this node are not the same 
+                (if the values are the same, it means that the division has been very good, no further division is required)
         """
         now_data = data[remain_index]
 
@@ -64,9 +67,9 @@ class Tree:
             split_value = None
             left_index_of_now_data = None
             right_index_of_now_data = None
-            self.logger.info(('--树的深度：%d' % depth))
+            self.logger.info(('--Tree Depth: %d' % depth))
             for feature in self.features:
-                self.logger.info(('----划分特征：', feature))
+                self.logger.info(('----Partition characteristics: ', feature))
                 feature_values = now_data[feature].unique()
                 for fea_val in feature_values:
                     # 尝试划分
@@ -75,7 +78,7 @@ class Tree:
                     left_se = calculate_se(now_data[left_index][self.target_name])
                     right_se = calculate_se(now_data[right_index][self.target_name])
                     sum_se = left_se + right_se
-                    self.logger.info(('------划分值:%.3f,左节点损失:%.3f,右节点损失:%.3f,总损失:%.3f' %
+                    self.logger.info(('------Division value:%.3f,Loss of left node:%.3f,Loss of right node:%.3f,Total lose:%.3f' %
                                       (fea_val, left_se, right_se, sum_se)))
                     if se is None or sum_se < se:
                         split_feature = feature
@@ -83,16 +86,12 @@ class Tree:
                         se = sum_se
                         left_index_of_now_data = left_index
                         right_index_of_now_data = right_index
-            self.logger.info(('--最佳划分特征：', split_feature))
-            self.logger.info(('--最佳划分值：', split_value))
+            self.logger.info(('--Best partition point：', split_feature))
+            self.logger.info(('--Best partition value：', split_value))
 
             node = Node(remain_index, self.logger, split_feature, split_value, deep=depth)
             """ 
             trick for DataFrame, index revert
-            下面这部分代码是为了记录划分后样本在原始数据中的的索引
-            DataFrame的数据索引可以使用True和False
-            所以下面得到的是一个bool类型元素组成的数组
-            利用这个数组进行索引获得划分后的数据
             """
             left_index_of_all_data = []
             for i in remain_index:

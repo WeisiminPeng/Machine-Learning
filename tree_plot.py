@@ -10,20 +10,21 @@ import matplotlib.pyplot as plt
 
 def plot_tree_model(tree: Tree, max_depth: int, iter: int):
     """
-           展示单棵决策树
-    :param tree: 生成的决策树
-    :param max_depth: 决策树的最大深度
-    :param iter: 第几棵决策树
+           desplay single decision tree
+    :param tree: Generated decision tree
+    :param max_depth: max depth of decision tree
+    :param iter: the number of decision tree
     :return:
     """
     
     root = tree.root_node
     res = []
-    # 通过遍历获取决策树的父子节点关系，可选有traversal 层次遍历 和traversal_preorder 先序遍历
+    # Obtain the parent-child node relationship of the decision tree by traversing, 
+    # optional traversal level traversal and traversal_preorder traversal
     traversal(root, res)
 
-    # 获取所有节点
-    nodes = {}   #创建一个队列
+    # Got all node point
+    nodes = {}   #build a array
     index = 0
     for i in res:
         p, c = i[0], i[1]
@@ -32,17 +33,17 @@ def plot_tree_model(tree: Tree, max_depth: int, iter: int):
             index = index + 1
         if c not in nodes.values():
             nodes[index] = c
-            index = index + 1     ##index：节点数
+            index = index + 1     ##index：Number of nodes
 
-    # 通过dot语法将决策树展示出来
+    # Display the decision tree through dot syntax
     edges = ''
     node = ''
     # pdb.set_trace()
-    # 将节点层次展示
+    # Show node hierarchy
     for depth in range(max_depth):
         for nodepair in res:
             if nodepair[0].deep == depth:
-                # p,c分别为节点对中的父节点和子节点
+                # p, c are the parent node and child node in the node pair respectively
                 p_, c_ = nodepair[0], nodepair[1]
                 l = len([i for i in range(len(c.data_index)) if c.data_index[i] is True])
                 pname = str(list(nodes.keys())[list(nodes.values()).index(p_)])
@@ -61,7 +62,7 @@ def plot_tree_model(tree: Tree, max_depth: int, iter: int):
                 continue
         dot = '''digraph g {\n''' + edges + node + '''}'''
         graph = pdp.graph_from_dot_data(dot)
-        # 保存图片+pyplot展示
+        # Save picture and pyplot display
         graph.write_png('results/NO.{}_tree.jpg'.format(iter))
         img = Image.open('results/NO.{}_tree.jpg'.format(iter))
         img = img.resize((1024, 700), Image.ANTIALIAS)
@@ -76,16 +77,17 @@ def plot_tree_model(tree: Tree, max_depth: int, iter: int):
 
 def plot_all_trees(numberOfTrees: int):
     '''
-           将所有生成的决策树集中到一张图中展示
-    :param numberOfTrees: 决策树的数量
+    Collect all the generated decision trees into one picture for display
+    :param numberOfTrees: the number of decision tree
     :return:
     '''
-    # 每行展示3棵决策树 根据决策树数量决定行数
+    # Each row displays 3 decision trees. 
+    # The number of rows is determined by the number of decision trees.
     if numberOfTrees / 3 - int(numberOfTrees / 3) > 0.000001:    #树个数不是三的整数就加一排
         rows = int(numberOfTrees / 3)+1
     else:
         rows = int(numberOfTrees / 3)
-    # 利用subplot 将所有决策树在一个figure中展示
+    # Use subplot to display all decision trees in one figure
     plt.figure(1, figsize=(30,20))
     plt.axis('off')
     try:
@@ -99,7 +101,8 @@ def plot_all_trees(numberOfTrees: int):
             plt.imshow(img)
         plt.savefig('results/all_trees.jpg', dpi=300)
         plt.show()
-        # 由于pyplot图片像素不是很高，使用方法生成高质量的图片
+        # Since pyplot picture pixels are not very high, 
+        # use the method to generate high-quality pictures
         image_compose(numberOfTrees)
     except Exception as e:
         raise e
@@ -107,13 +110,13 @@ def plot_all_trees(numberOfTrees: int):
 
 def image_compose(numberOfTrees: int):
     '''
-           将numberOfTrees棵决策树的图片拼接到一张图片上
-    :param numberOfTrees: 决策树的数量
+    Stitch the picture of numberOfTrees decision tree into one picture
+    :param numberOfTrees: number of decision tree
     :return:
     '''
 
     png_to_compose = []
-    # 获取每张图片的size
+    # Get the size of each picture
     for index in range(1,numberOfTrees+1):
         png_to_compose.append('NO.{}_tree.jpg'.format(index))
     try:
@@ -129,9 +132,9 @@ def image_compose(numberOfTrees: int):
         IMAGE_ROW = int(len(png_to_compose)/IMAGE_COLUMN)+1
     else:
         IMAGE_ROW = int(len(png_to_compose) / IMAGE_COLUMN)
-    # 新建一张用于拼接的图片
+    # Create a new picture for stitching
     to_image = Image.new('RGB', (IMAGE_COLUMN*IMAGE_WIDTH, IMAGE_ROW*IMAGE_HEIGET), '#FFFFFF')
-    # 拼接图片
+    # stitch picture
     for y in  range(IMAGE_ROW):
         for x in range(IMAGE_COLUMN):
             if y*IMAGE_COLUMN+x+1 > len(png_to_compose):
@@ -143,12 +146,12 @@ def image_compose(numberOfTrees: int):
     to_image.save('results/all_trees_high_quality.jpg')
 
 
-def traversal_preorder(root: Node, res: list):   #先序
+def traversal_preorder(root: Node, res: list):  
     '''
-    先序遍历决策树获取节点间的父子关系
-    :param root: 决策树的根节点
-    :param res:  存储节点对(父节点,子节点)的list
-    :return: res
+    First traverse the decision tree to obtain the parent-child relationship between nodes
+     :param root: the root node of the decision tree
+     :param res: store a list of node pairs (parent node, child node)
+     :return: res
     '''
     if root is None:
         return
@@ -160,12 +163,12 @@ def traversal_preorder(root: Node, res: list):   #先序
         traversal_preorder(root.right_child, res)
 
 
-def traversal(root: Node, res: list):   #层次遍历
+def traversal(root: Node, res: list):   
     '''
-    层次遍历决策树获取节点间的父子关系
-    :param root: 决策树的根节点
-    :param res:  存储节点对(父节点,子节点)的list
-    :return: res
+    Hierarchically traverse the decision tree to obtain the parent-child relationship between nodes
+     :param root: the root node of the decision tree
+     :param res: store a list of node pairs (parent node, child node)
+     :return: res
     '''
     outList = []
     queue = [root]

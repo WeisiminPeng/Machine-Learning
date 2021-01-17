@@ -7,23 +7,23 @@ class LossFunction(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def initialize_f_0(self, data):
-        """初始化 F_0 """
+        """initiate F_0 """
 
     @abc.abstractmethod
     def calculate_residual(self, data, iter):
-        """计算负梯度"""
+        """Calculate negative gradient"""
 
     @abc.abstractmethod
     def update_f_m(self, data, trees, iter, learning_rate, logger):
-        """计算 F_m """
+        """Calculate F_m """
 
     @abc.abstractmethod
     def update_leaf_values(self, targets, y):
-        """更新叶子节点的预测值"""
+        """Update the predicted value of the leaf node"""
 
     @abc.abstractmethod
     def get_train_loss(self, y, f, iter, logger):
-        """计算训练损失"""
+        """Calculate training loss"""
 
 
 class SquaresError(LossFunction):
@@ -51,7 +51,7 @@ class SquaresError(LossFunction):
 
     def get_train_loss(self, y, f, iter, logger):
         loss = ((y - f) ** 2).mean()
-        logger.info(('第%d棵树: mse_loss:%.4f' % (iter, loss)))
+        logger.info(('Tree No.%d: mse_loss:%.4f' % (iter, loss)))
 
 '''
 class BinomialDeviance(LossFunction):

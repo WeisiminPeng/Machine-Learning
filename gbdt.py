@@ -47,13 +47,13 @@ class BaseGradientBoosting(AbstractBaseGradientBoosting):
         """
         :param data: pandas.DataFrame, the features data of train training   
         """
-        # 掐头去尾， 删除id和label，得到特征名称
+        # delete id and label, got charactor name
         self.features = list(data.columns)[: -1]
         # pdb.set_trace()
-        # 初始化 f_0(x)
-        # 对于平方损失来说，初始化 f_0(x) 就是 y 的均值
+        # initiate f_0(x)
+        # For square loss, the initialization f_0(x) is the mean value of y
         self.f_0 = self.loss.initialize_f_0(data)
-        # 对 m = 1, 2, ..., M
+        # for m = 1, 2, ..., M
         logger.handlers[0].setLevel(logging.INFO if self.is_log else logging.CRITICAL)
         for iter in range(1, self.n_trees+1):
             if len(logger.handlers) > 1:
@@ -61,14 +61,14 @@ class BaseGradientBoosting(AbstractBaseGradientBoosting):
             fh = logging.FileHandler('results/NO.{}_tree.log'.format(iter), mode='w', encoding='utf-8')
             fh.setLevel(logging.DEBUG)
             logger.addHandler(fh)
-            # 计算负梯度--对于平方误差来说就是残差
-            logger.info(('-----------------------------构建第%d颗树-----------------------------' % iter))
+            # Calculate the negative gradient-the residual for the squared error
+            logger.info(('-----------------------------Build Tree No. %d-----------------------------' % iter))
             self.loss.calculate_residual(data, iter)
             target_name = 'res_' + str(iter)
             self.trees[iter] = Tree(data, self.max_depth, self.min_samples_split,
                                     self.features, self.loss, target_name, logger)
             self.loss.update_f_m(data, self.trees, iter, self.learning_rate, logger)
-            if self.is_plot:   ##examply.py主函数那个
+            if self.is_plot:  
                 plot_tree_model(self.trees[iter], max_depth=self.max_depth, iter=iter)
                 # plot_tree(self.trees[iter], max_depth=self.max_depth, iter=iter)
         # print(self.trees)
@@ -82,11 +82,11 @@ class GradientBoostingRegressor(BaseGradientBoosting):
         super().__init__(SquaresError(), learning_rate, n_trees, max_depth,
                          min_samples_split, is_log, is_plot)
      
-    ##预测一个样本
+    ##Predict one sample
     def predict(self, data):
         data['f_0'] = self.f_0
         for iter in range(1, self.n_trees+1):
-            print('第%i颗树'% iter)
+            print('Tree No.%i'% iter)
             f_prev_name = 'f_' + str(iter - 1)
             f_m_name = 'f_' + str(iter)
             data[f_m_name] = data[f_prev_name] + \
